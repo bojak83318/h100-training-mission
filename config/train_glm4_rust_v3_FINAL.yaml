@@ -1,0 +1,54 @@
+### MODEL & TOKENIZER
+model_name_or_path: THUDM/glm-4.7-flash
+trust_remote_code: true
+template: glm4  # Uses native [TOOL_CALLS] format
+resize_vocab: false  # Native tokens only; no training instability
+
+### PRECISION (HYBRID NVFP4/FP16)
+quantization_bit: 4
+quantization_method: bitsandbytes
+# CRITICAL: The "Do Not Quantize" List (Audit-Validated)
+llm_int8_skip_modules:
+  - "moe.router"        # The Gating Network (prevents collapse)
+  - "q_proj"            # Attention Heads (Query)
+  - "k_proj"            # Attention Heads (Key)
+  - "v_proj"            # Attention Heads (Value)
+  - "o_proj"            # Attention Output
+  - "lm_head"           # Token Generator
+  - "embed_tokens"      # Input Embeddings
+
+### DATASET
+dataset: rust_agent_native_format_train
+dataset_dir: data
+cutoff_len: 8192
+max_samples: 50000
+overwrite_cache: true
+
+### TRAINING (VRAM SAFE MODE)
+per_device_train_batch_size: 2  # Audit recommendation for 80GB
+gradient_accumulation_steps: 8  # Effective Batch Size = 16
+learning_rate: 2.0e-5
+num_train_epochs: 2
+lr_scheduler_type: cosine
+warmup_ratio: 0.05
+fp16: true
+gradient_checkpointing: true
+
+### LORA ADAPTER
+lora_rank: 128
+lora_alpha: 256
+lora_target: all-linear
+use_rslora: true
+lora_dropout: 0.05
+
+### LOGGING & MONITORING
+logging_steps: 5
+save_steps: 200
+eval_steps: 200
+eval_dataset: rust_validation_holdout
+report_to: wandb
+run_name: glm4.7-rust-hybrid-fp4-v3
+
+### OPTIMIZATION
+use_unsloth: true
+flash_attn: disabled  # Safe mode for Step 0-500
