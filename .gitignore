@@ -1,0 +1,27 @@
+# Training Artifacts
+data/
+outputs/
+*.jsonl
+
+# Keep the config file specifically
+*.yaml
+!config/train_glm4_rust_v3_FINAL.yaml
+
+# Logs and Monitoring
+*.log
+proxmox_mcp.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.venv/
+env/
+venv/
+ENV/
+
+# OS
+.DS_Store
+.idea/
+.vscode/
